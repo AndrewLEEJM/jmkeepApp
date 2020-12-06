@@ -1,15 +1,39 @@
-import * as React from 'react';
+import React, {Component} from 'react';
 import {Text, TextInput, View, StyleSheet, ScrollView} from 'react-native';
 
-function CreatePostScreen({navigation, route}) {
-  const [postText, setPostText] = React.useState('');
+export default class AddNote extends Component {
+  state = {
+    title: '',
+    content: '',
+  };
 
-  return (
-    <>
+  componentDidMount() {
+    const {route} = this.props;
+    if (route.params) {
+      this.setState({
+        title: route.params.memo.title,
+        content: route.params.memo.content,
+      });
+    }
+  }
+
+  inputTitle = (val) => {
+    this.setState({
+      title: val,
+    });
+  };
+  inputContent = (val) => {
+    console.log(this.state);
+    this.setState({
+      content: val,
+    });
+  };
+
+  render() {
+    return (
       <View style={styles.mainContainer}>
         <ScrollView keyboardShouldPersistTaps="always">
           <TextInput
-            multiline
             placeholder="제목"
             style={{
               padding: 10,
@@ -17,22 +41,20 @@ function CreatePostScreen({navigation, route}) {
               borderBottomWidth: 1,
               borderBottomColor: 'lightgrey',
             }}
-            value={postText}
-            onChangeText={setPostText}
+            value={this.state.title}
+            onChangeText={(val) => this.inputTitle(val)}
           />
           <TextInput
             multiline
             style={{padding: 10}}
-            value={postText}
-            onChangeText={setPostText}
+            value={this.state.content}
+            onChangeText={(val) => this.inputContent(val)}
           />
         </ScrollView>
       </View>
-    </>
-  );
+    );
+  }
 }
-
-export default CreatePostScreen;
 
 const styles = StyleSheet.create({
   mainContainer: {
