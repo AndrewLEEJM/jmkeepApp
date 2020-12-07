@@ -3,6 +3,9 @@ export const REMOVE_MEMO = 'REMOVE_MEMO';
 export const UPDATE_MEMO = 'UPDATE_MEMO';
 export const NONE = 'NONE';
 
+import 'react-native-get-random-values';
+import {v4 as uuidV4} from 'uuid';
+
 export function addMemo(memo) {
   console.log(memo);
   if (memo.id) {
@@ -17,7 +20,7 @@ export function addMemo(memo) {
       type: ADD_MEMO,
       memo: {
         ...memo,
-        id: `${Math.random * 100}`,
+        id: uuidV4(),
       },
     };
   }
