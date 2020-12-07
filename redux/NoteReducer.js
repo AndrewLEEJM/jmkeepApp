@@ -9,7 +9,6 @@ const initState = {
     },
   ],
 };
-
 const NoteReducer = (state = initState, action) => {
   switch (action.type) {
     case UPDATE_MEMO:
@@ -30,6 +29,7 @@ const NoteReducer = (state = initState, action) => {
       return state;
   }
 };
+
 const updateMemo = (state, memo) => {
   const idx = state.findIndex((n) => n.id === memo.id);
   state[idx] = memo;

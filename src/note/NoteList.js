@@ -1,24 +1,61 @@
-import * as React from 'react';
+import React from 'react';
 import {
   Text,
-  TextInput,
   View,
-  Button,
   StyleSheet,
   TouchableHighlight,
   ScrollView,
   Platform,
+  DeviceEventEmitter,
 } from 'react-native';
-import {removeMemo} from '../redux/Action';
-import {connect} from 'react-redux';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+const key = 'state';
 
 class NoteList extends React.Component<{}> {
-  removeMemo = (memo) => {
-    this.props.dispatchRemoveMemo(memo);
+  state = {
+    memo: [],
   };
 
+  async componentDidMount() {
+    try {
+      let memo = await AsyncStorage.getItem(key);
+      if (memo) {
+        memo = JSON.parse(memo);
+        this.state.memo.push(...memo);
+        this.setState(memo);
+      }
+    } catch (e) {
+      console.log('error from AsyncStorage: ', e);
+    }
+  }
+
+  UNSAFE_componentWillMount() {
+    DeviceEventEmitter.addListener('update', (val) => {
+      this.state.memo = [];
+      this.state.memo.push(...val);
+      this.setState(val);
+    });
+  }
+
+  removeMemo(val) {
+    const idx = this.state.memo.findIndex((n) => n.id === val.id);
+    if (idx !== -1) {
+      const memo = [
+        ...this.state.memo.slice(0, idx),
+        ...this.state.memo.slice(idx + 1),
+      ];
+      AsyncStorage.setItem(key, JSON.stringify(memo))
+        .then(() => console.log('success!'))
+        .catch((e) => console.log('e: ', e));
+
+      this.setState({memo});
+    }
+  }
+
   render() {
-    const {navigation, memo} = this.props;
+    const {navigation} = this.props;
+
     return (
       <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
         <ScrollView keyboardShouldPersistTaps="always" style={{width: '100%'}}>
@@ -28,7 +65,7 @@ class NoteList extends React.Component<{}> {
             style={styles.button}>
             <Text style={styles.text}>새 메모 작성</Text>
           </TouchableHighlight>
-          {memo.map((memo, index) => (
+          {this.state.memo.map((memo, index) => (
             <View style={styles.memoContainer} key={index}>
               <TouchableHighlight
                 style={{flex: 15}}
@@ -109,11 +146,4 @@ const styles = StyleSheet.create({
   },
 });
 
-const mapDispatchToProps = {
-  dispatchRemoveMemo: (memo) => removeMemo(memo),
-};
-
-export default connect(
-  (state) => ({memo: state.memo}),
-  mapDispatchToProps,
-)(NoteList);
+export default NoteList;

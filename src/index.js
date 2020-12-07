@@ -5,10 +5,6 @@ import {createStackNavigator} from '@react-navigation/stack';
 
 import NoteList from './note/NoteList';
 import AddNote from './note/AddNote';
-import rootReducer from './redux/NoteReducer';
-
-import {Provider} from 'react-redux';
-import {createStore} from 'redux';
 
 const options = {
   headerStyle: {
@@ -30,26 +26,19 @@ const options2 = {
   },
 };
 
-const store = createStore(rootReducer);
 const Stack = createStackNavigator();
 
 export default function App() {
   return (
-    <Provider store={store}>
-      <NavigationContainer>
-        <Stack.Navigator mode="JMKeepApp">
-          <Stack.Screen
-            name="JMKeepApp"
-            component={NoteList}
-            options={options}
-          />
-          <Stack.Screen
-            name="CreatePost"
-            component={AddNote}
-            options={options2}
-          />
-        </Stack.Navigator>
-      </NavigationContainer>
-    </Provider>
+    <NavigationContainer>
+      <Stack.Navigator mode="JMKeepApp">
+        <Stack.Screen name="JMKeepApp" component={NoteList} options={options} />
+        <Stack.Screen
+          name="CreatePost"
+          component={AddNote}
+          options={options2}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }

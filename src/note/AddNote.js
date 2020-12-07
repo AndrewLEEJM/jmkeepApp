@@ -1,8 +1,17 @@
 import React, {Component} from 'react';
-import {Text, TextInput, View, StyleSheet, ScrollView} from 'react-native';
+import {
+  DeviceEventEmitter,
+  TextInput,
+  View,
+  StyleSheet,
+  ScrollView,
+} from 'react-native';
 
-import {addMemo} from '../redux/Action';
-import {connect} from 'react-redux';
+import 'react-native-get-random-values';
+import {v4 as uuidV4} from 'uuid';
+
+import AsyncStorage from '@react-native-async-storage/async-storage';
+const key = 'state';
 
 class AddNote extends Component {
   state = {
@@ -22,13 +31,36 @@ class AddNote extends Component {
     }
   }
 
-  componentWillUnmount() {
-    this.props.dispatchAddMemo(this.state);
+  async componentWillUnmount() {
+    let total = [];
+    try {
+      let memo = await AsyncStorage.getItem(key);
+      if (memo) {
+        memo = JSON.parse(memo);
+        total.push(...memo);
+      }
+    } catch (e) {
+      console.log('error from AsyncStorage: ', e);
+    }
+    if (this.state.id) {
+      const idx = total.findIndex((n) => n.id === this.state.id);
+      if (idx !== -1) {
+        total[idx] = this.state;
+        AsyncStorage.setItem(key, JSON.stringify(total))
+          .then(() => console.log('success!'))
+          .catch((e) => console.log('e: ', e));
+        DeviceEventEmitter.emit('update', total);
+      }
+    } else if (this.state.title) {
+      this.state.id = uuidV4();
+      const memo = this.state;
+      total.push(memo);
+      AsyncStorage.setItem(key, JSON.stringify(total))
+        .then(() => console.log('success!'))
+        .catch((e) => console.log('e: ', e));
+      DeviceEventEmitter.emit('update', total);
+    }
   }
-
-  addMemo = () => {
-    this.props.dispatchAddMemo(this.state);
-  };
 
   inputTitle = (val) => {
     this.setState({
@@ -81,11 +113,4 @@ const styles = StyleSheet.create({
   },
 });
 
-const mapDispatchToProps = {
-  dispatchAddMemo: (memo) => addMemo(memo),
-};
-
-export default connect(
-  (state) => ({memo: state.memo}),
-  mapDispatchToProps,
-)(AddNote);
+export default AddNote;
