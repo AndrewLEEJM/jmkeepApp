@@ -36,9 +36,9 @@ class NoteList extends React.Component<{}> {
                 onPress={() => navigation.navigate('CreatePost', {memo})}>
                 <View>
                   <Text style={styles.memoTitle}>{memo.title}</Text>
-                  <Text style={styles.memoContent}>
+                  <Text style={styles.memoContent} numberOfLines={1}>
                     {memo.content.length > 30
-                      ? memo.content.substring(0, 28) + ' · · · ·'
+                      ? memo.content.substring(0, 30)
                       : memo.content}
                   </Text>
                 </View>
