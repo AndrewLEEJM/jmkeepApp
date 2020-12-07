@@ -1,10 +1,14 @@
 import React, {Component} from 'react';
 import {Text, TextInput, View, StyleSheet, ScrollView} from 'react-native';
 
-export default class AddNote extends Component {
+import {addMemo} from '../redux/Action';
+import {connect} from 'react-redux';
+
+class AddNote extends Component {
   state = {
     title: '',
     content: '',
+    id: '',
   };
 
   componentDidMount() {
@@ -13,9 +17,18 @@ export default class AddNote extends Component {
       this.setState({
         title: route.params.memo.title,
         content: route.params.memo.content,
+        id: route.params.memo.id,
       });
     }
   }
+
+  componentWillUnmount() {
+    this.props.dispatchAddMemo(this.state);
+  }
+
+  addMemo = () => {
+    this.props.dispatchAddMemo(this.state);
+  };
 
   inputTitle = (val) => {
     this.setState({
@@ -67,3 +80,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+
+const mapDispatchToProps = {
+  dispatchAddMemo: (memo) => addMemo(memo),
+};
+
+export default connect(
+  (state) => ({memo: state.memo}),
+  mapDispatchToProps,
+)(AddNote);
