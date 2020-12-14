@@ -9,16 +9,31 @@ import {
   ScrollView,
   Platform,
 } from 'react-native';
+
 import {removeMemo} from '../redux/Action';
 import {connect} from 'react-redux';
+import axios from 'axios';
 
 class NoteList extends React.Component<{}> {
+  state = {
+    memo: [],
+  };
   removeMemo = (memo) => {
     this.props.dispatchRemoveMemo(memo);
   };
 
+  async componentDidMount() {
+    try {
+      const result = await axios.get('http://192.168.200.115:3030/get/memo');
+      console.log(result.data);
+      this.setState({memo: result.data.memo});
+    } catch (e) {
+      console.log(e);
+    }
+  }
+
   render() {
-    const {navigation, memo} = this.props;
+    const {navigation} = this.props;
     return (
       <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
         <ScrollView keyboardShouldPersistTaps="always" style={{width: '100%'}}>
@@ -28,14 +43,18 @@ class NoteList extends React.Component<{}> {
             style={styles.button}>
             <Text style={styles.text}>새 메모 작성</Text>
           </TouchableHighlight>
-          {memo.map((memo, index) => (
+          {this.state.memo.map((memo, index) => (
             <View style={styles.memoContainer} key={index}>
               <TouchableHighlight
                 style={{flex: 15}}
                 underlayColor="#f2f2f2"
                 onPress={() => navigation.navigate('CreatePost', {memo})}>
                 <View>
-                  <Text style={styles.memoTitle}>{memo.title}</Text>
+                  <Text style={styles.memoTitle}>
+                    {memo.title.length > 15
+                      ? memo.title.substring(0, 15) + '...'
+                      : memo.title}
+                  </Text>
                   <Text style={styles.memoContent} numberOfLines={1}>
                     {memo.content.length > 30
                       ? memo.content.substring(0, 30)
@@ -71,7 +90,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   button: {
-    backgroundColor: 'coral',
+    backgroundColor: '#e8b0c1',
     width: 90,
     height: 40,
     alignItems: 'center',

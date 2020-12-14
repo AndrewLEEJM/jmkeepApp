@@ -1,4 +1,14 @@
 import {ADD_MEMO, UPDATE_MEMO, REMOVE_MEMO} from './Action';
+import axios from 'axios';
+
+const init = async () => {
+  try {
+    const result = await axios.get('http://localhost:3030/get/memo');
+    return result.data.memo;
+  } catch (e) {
+    console.log(e);
+  }
+};
 
 const initState = {
   memo: [

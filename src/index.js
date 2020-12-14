@@ -12,7 +12,7 @@ import {createStore} from 'redux';
 
 const options = {
   headerStyle: {
-    backgroundColor: 'coral',
+    backgroundColor: '#e8b0c1',
   },
   headerTintColor: '#fff',
   headerTitleStyle: {
@@ -22,7 +22,7 @@ const options = {
 const options2 = {
   title: '',
   headerStyle: {
-    backgroundColor: 'coral',
+    backgroundColor: '#e8b0c1',
   },
   headerTintColor: '#fff',
   headerTitleStyle: {
