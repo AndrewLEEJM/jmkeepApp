@@ -8,28 +8,43 @@ import {
   TouchableHighlight,
   ScrollView,
   Platform,
+  DeviceEventEmitter,
 } from 'react-native';
 
-import {removeMemo} from '../redux/Action';
-import {connect} from 'react-redux';
 import axios from 'axios';
 
-class NoteList extends React.Component<{}> {
+export default class NoteList extends React.Component<{}> {
   state = {
     memo: [],
   };
-  removeMemo = (memo) => {
-    this.props.dispatchRemoveMemo(memo);
-  };
 
-  async componentDidMount() {
+  componentDidMount() {
+    this.init();
+  }
+
+  UNSAFE_componentWillMount() {
+    DeviceEventEmitter.addListener('update', () => {
+      this.init();
+    });
+  }
+
+  async init() {
     try {
-      const result = await axios.get('http://192.168.200.115:3030/get/memo');
-      console.log(result.data);
+      const result = await axios.get('http://172.30.1.9:3030/get/memo');
       this.setState({memo: result.data.memo});
     } catch (e) {
       console.log(e);
     }
+  }
+
+  async removeMemo(memo) {
+    try {
+      await axios.delete(`http://172.30.1.9:3030/remove/memo/:${memo._id}`);
+    } catch (e) {
+      console.log(e);
+    }
+    const remove = this.state.memo.filter((n) => n._id !== memo._id);
+    this.setState({memo: remove});
   }
 
   render() {
@@ -127,12 +142,3 @@ const styles = StyleSheet.create({
     height: 25,
   },
 });
-
-const mapDispatchToProps = {
-  dispatchRemoveMemo: (memo) => removeMemo(memo),
-};
-
-export default connect(
-  (state) => ({memo: state.memo}),
-  mapDispatchToProps,
-)(NoteList);

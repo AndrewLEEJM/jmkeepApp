@@ -1,34 +1,61 @@
 import React, {Component} from 'react';
-import {Text, TextInput, View, StyleSheet, ScrollView} from 'react-native';
+import {
+  Text,
+  TextInput,
+  View,
+  StyleSheet,
+  ScrollView,
+  DeviceEventEmitter,
+} from 'react-native';
 
-import {addMemo} from '../redux/Action';
-import {connect} from 'react-redux';
-
-class AddNote extends Component {
+import axios from 'axios';
+export default class AddNote extends Component {
   state = {
     title: '',
     content: '',
-    id: '',
+    _id: '',
   };
 
   componentDidMount() {
     const {route} = this.props;
+    console.log(route);
     if (route.params) {
       this.setState({
         title: route.params.memo.title,
         content: route.params.memo.content,
-        id: route.params.memo.id,
+        _id: route.params.memo._id,
       });
     }
   }
 
-  componentWillUnmount() {
-    this.props.dispatchAddMemo(this.state);
+  async componentWillUnmount() {
+    if (!this.state.title && !this.state.content) {
+      console.log('아무것도 없음');
+      return;
+    } else if (!this.state._id) {
+      console.log('신규 메모');
+      try {
+        const result = await axios.post('http://172.30.1.9:3030/write/memo', {
+          title: this.state.title,
+          content: this.state.content,
+        });
+      } catch (e) {
+        console.log(e);
+      }
+    } else {
+      console.log('업뎃메모');
+      try {
+        await axios.put('http://172.30.1.9:3030/update/memo', {
+          title: this.state.title,
+          content: this.state.content,
+          _id: this.state._id,
+        });
+      } catch (e) {
+        console.log(e);
+      }
+    }
+    DeviceEventEmitter.emit('update');
   }
-
-  addMemo = () => {
-    this.props.dispatchAddMemo(this.state);
-  };
 
   inputTitle = (val) => {
     this.setState({
@@ -36,7 +63,6 @@ class AddNote extends Component {
     });
   };
   inputContent = (val) => {
-    console.log(this.state);
     this.setState({
       content: val,
     });
@@ -80,12 +106,3 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
-
-const mapDispatchToProps = {
-  dispatchAddMemo: (memo) => addMemo(memo),
-};
-
-export default connect(
-  (state) => ({memo: state.memo}),
-  mapDispatchToProps,
-)(AddNote);
